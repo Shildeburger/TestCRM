@@ -190,7 +190,9 @@ watch([search, country, favorite, sort, direction], () => {
                             </button>
                         </td>
                         <td class="py-1">
-                            {{ contact.name }}
+                            <Link :href="route('contacts.show', contact.id)">
+                                {{ contact.name }}
+                            </Link>
                         </td>
                         <td class="py-1">
                             {{ contact.email }}

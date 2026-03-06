@@ -178,4 +178,25 @@ class ContactController extends Controller
     {
         abort_unless($contact->user_id === Auth::id(), 403);
     }
+
+    public function show(Contact $contact)
+    {
+        $this->authorizeContact($contact);
+
+        return Inertia::render('Contacts/Show', [
+            'contact' => [
+                'id'                => $contact->id,
+                'name'              => $contact->name,
+                'email'             => $contact->email,
+                'phone'             => $contact->phone,
+                'company'           => $contact->company,
+                'job_title'         => $contact->job_title,
+                'country'           => $contact->country,
+                'notes'             => $contact->notes,
+                'is_favorite'       => $contact->is_favorite,
+                'telegram_user_id'  => $contact->telegram_user_id,
+                'telegram_username' => $contact->telegram_username,
+            ],
+        ]);
+    }
 }

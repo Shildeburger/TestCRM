@@ -14,6 +14,10 @@ return [
     |
     */
 
+    'telegram' => [
+    'default_contact_owner' => env('TELEGRAM_DEFAULT_CONTACT_OWNER', 1),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

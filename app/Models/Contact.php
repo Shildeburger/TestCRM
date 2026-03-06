@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Contact extends Model
 {
@@ -17,8 +18,10 @@ class Contact extends Model
         'email',
         'phone',
         'company',
-        'job_title',
         'country',
+        'job_title',
+        'telegram_user_id',
+        'telegram_username',
         'notes',
         'is_favorite'
     ];
@@ -35,5 +38,15 @@ class Contact extends Model
     public function scopeOwnedBy(Builder $query, User $user): Builder
     {
         return $query->where('user_id', $user->id);
+    }
+
+     public function telegramChats(): HasMany
+    {
+        return $this->hasMany(TelegramChat::class);
+    }
+
+    public function primaryTelegramChat()
+    {
+        return $this->hasOne(TelegramChat::class)->where('is_primary', true);
     }
 }

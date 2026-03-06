@@ -40,6 +40,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/contacts/{contact}/favorite', [ContactController::class, 'toggleFavorite'])
         ->name('contacts.favorite');
+    
+    Route::get('/contacts/{contact}', [ContactController::class, 'show'])
+    ->name('contacts.show');
 });
 
 Route::get('/playground', function () {
