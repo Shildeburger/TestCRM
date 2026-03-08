@@ -5,6 +5,8 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Events\TelegramMessageCreated;
+use App\Models\TelegramMessage;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -43,6 +45,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::get('/contacts/{contact}', [ContactController::class, 'show'])
     ->name('contacts.show');
+
+    Route::get('/test-broadcast', function () {
+    $message = TelegramMessage::where('telegram_chat_id', 25)->latest()->first();
+    if (! $message) {
+        return 'no message for chat 25';
+    }
+    event(new TelegramMessageCreated($message));
+    return 'ok';
+    });
 });
 
 Route::get('/playground', function () {

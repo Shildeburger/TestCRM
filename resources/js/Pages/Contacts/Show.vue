@@ -1,9 +1,14 @@
 <script setup>
+import { ref, onMounted } from "vue";
 import { useForm, Link } from "@inertiajs/vue3";
 
 const props = defineProps({
     contact: Object,
+    chat: Object,
+    messages: Array,
 });
+
+const messages = ref(props.messages ?? []);
 
 const form = useForm({
     telegram_user_id: props.contact.telegram_user_id || "",
@@ -13,6 +18,27 @@ const form = useForm({
 const submit = () => {
     form.patch(route("contacts.telegram.link", props.contact.id));
 };
+
+onMounted(() => {
+    if (!props.chat) {
+        return;
+    }
+    const chatID = props.chat.id;
+
+    window.Echo.private(`telegram.chat.${chatID}`).listen(
+        ".TelegramMessageCreated",
+        (e) => {
+            messages.value.push({
+                id: e.id,
+                telegram_chat_id: e.chat_id,
+                text: e.text,
+                direction: e.direction,
+                from_role: e.from_role,
+                sent_at: e.sent_at,
+            });
+        },
+    );
+});
 </script>
 
 <template>
@@ -29,6 +55,13 @@ const submit = () => {
                 ← Назад к списку
             </Link>
         </header>
+
+        <div class="messages">
+            <div v-for="message in messages" :key="message.id">
+                <span>{{ message.from_role }}:</span>
+                <span>{{ message.text }}</span>
+            </div>
+        </div>
 
         <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-2">

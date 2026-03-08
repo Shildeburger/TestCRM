@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Contact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\TelegramChat;
+use App\Models\TelegramMessage;
 use Inertia\Inertia;
 
 class ContactController extends Controller
@@ -183,6 +185,26 @@ class ContactController extends Controller
     {
         $this->authorizeContact($contact);
 
+        $chat = TelegramChat::where('contact_id', $contact->id)
+            ->where('is_primary', true)
+            ->first();
+
+        $messages = [];
+
+        if ($chat) {
+            $messages = TelegramMessage::where('telegram_chat_id', $chat->id)
+                ->orderBy('sent_at')
+                ->get()
+                ->map(fn (TelegramMessage $message) => [
+                    'id'               => $message->id,
+                    'telegram_chat_id' => $message->telegram_chat_id,
+                    'text'             => $message->text,
+                    'direction'        => $message->direction,
+                    'from_role'        => $message->from_role,
+                    'sent_at'          => $message->sent_at?->toIso8601String(),
+                ]);
+        }
+
         return Inertia::render('Contacts/Show', [
             'contact' => [
                 'id'                => $contact->id,
@@ -197,6 +219,14 @@ class ContactController extends Controller
                 'telegram_user_id'  => $contact->telegram_user_id,
                 'telegram_username' => $contact->telegram_username,
             ],
+            'chat' => $chat ? [
+                'id'             => $chat->id,
+                'type'           => $chat->type,
+                'chat_title'     => $chat->chat_title,
+                'chat_username'  => $chat->chat_username,
+                'chat_external_id' => $chat->chat_external_id,
+            ] : null,
+            'messages' => $messages,
         ]);
     }
 }

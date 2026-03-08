@@ -6,6 +6,7 @@ import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import { createApp, h } from "vue";
 import { ZiggyVue } from "../../vendor/tightenco/ziggy";
 import Echo from "laravel-echo";
+import Pusher from "pusher-js";
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
 
@@ -27,12 +28,14 @@ createInertiaApp({
     },
 });
 
+window.Pusher = Pusher;
+
 window.Echo = new Echo({
     broadcaster: "reverb",
-    key: import.meta.env.VITE_REVERB_APP_KEY || "app-key",
+    key: import.meta.env.VITE_REVERB_APP_KEY || "local",
     wsHost: import.meta.env.VITE_REVERB_HOST || window.location.hostname,
-    wsPort: import.meta.env.VITE_REVERB_PORT || 6001,
-    wssPort: import.meta.env.VITE_REVERB_PORT || 6001,
+    wsPort: import.meta.env.VITE_REVERB_PORT || 8080,
+    wssPort: import.meta.env.VITE_REVERB_PORT || 8080,
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME || "http") === "https",
     enabledTransports: ["ws", "wss"],
 });

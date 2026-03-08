@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::table('contacts', function (Blueprint $table) {
             $table->unsignedBigInteger('telegram_user_id')
                 ->nullable()
-                ->unique()
+                ->index()
                 ->after('id');
 
             $table->string('telegram_username')
