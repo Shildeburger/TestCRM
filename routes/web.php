@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +46,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::get('/contacts/{contact}', [ContactController::class, 'show'])
     ->name('contacts.show');
+
+    Route::resource('tasks', TaskController::class)->only([
+    'index', 'store', 'update', 'destroy'
+    ]);
 
     Route::get('/test-broadcast', function () {
     $message = TelegramMessage::where('telegram_chat_id', 25)->latest()->first();

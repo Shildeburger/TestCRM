@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from "vue";
-import { usePage } from "@inertiajs/vue3";
+import { usePage, Link, router } from "@inertiajs/vue3";
 
 const page = usePage();
 
@@ -15,7 +15,9 @@ const flashError = computed(() => page.props.flash?.error || null);
             <div
                 class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center"
             >
-                <h1 class="font-semibold">My CRM</h1>
+                <Link :href="route('dashboard')" class="font-semibold">
+                    My CRM
+                </Link>
                 <div v-if="page.props.auth?.user" class="text-sm text-gray-700">
                     {{ page.props.auth.user.name }}
                 </div>

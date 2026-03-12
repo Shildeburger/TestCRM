@@ -21,9 +21,15 @@ import { router, Link } from "@inertiajs/vue3";
                 </div>
             </div>
         </div>
-        <div class="border px-2 py-1 rounded">
+        <div class="border px-2 py-1 rounded mt-4">
             <div class="flex justify-center mb-4">
                 <Link :href="route('contacts.index')">Contact List</Link>
+            </div>
+        </div>
+
+        <div class="border px-2 py-1 rounded mt-4">
+            <div class="flex justify-center mb-4">
+                <Link :href="route('tasks.index')">Task List</Link>
             </div>
         </div>
     </AuthLayout>
