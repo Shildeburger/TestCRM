@@ -61,6 +61,11 @@ class TgHandler extends WebhookHandler
             ]
         );
 
+        if ($contact->wasRecentlyCreated) {
+            // Вызываем событие, которое отправит данные во Vue
+            event(new \App\Events\TelegramContactCreated($contact));
+        }
+
         // 3) Найти или создать нашу обёртку TelegramChat
         $crmChat = TelegramChat::firstOrCreate(
             [

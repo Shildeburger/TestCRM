@@ -9,7 +9,7 @@
 //  без необходимости создавать отдельные функции setup() и возвращать объект.
 //  Все переменные и функции, объявленные в <script setup>, автоматически доступны в шаблоне компонента.
 //  Это делает код более компактным и удобным для чтения.
-import { ref, watch } from "vue"; //ref - это функция из Vue, которая позволяет создавать реактивные переменные.
+import { ref, watch, onMounted, onUnmounted } from "vue"; //ref - это функция из Vue, которая позволяет создавать реактивные переменные.
 //  Когда значение ref изменяется, Vue автоматически обновляет все места, где это значение используется в шаблоне.
 //watch - это функция из Vue, которая позволяет отслеживать изменения в реактивных переменных
 //  и выполнять определенные действия при их изменении.
@@ -104,6 +104,32 @@ watch([search, country, favorite, sort, direction], () => {
     //  Когда любое из этих значений изменяется, мы вызываем функцию reload(),
     //  которая отправляет запрос на сервер для получения обновленных данных контактов с учетом новых фильтров и сортировки.
     reload();
+});
+
+//Логика работы с WebSockets (Reverb)
+onMounted(() => {
+    //Подключаемся к приватному каналу 'contacts'
+    window.Echo.private("contacts").listen(
+        "TelegramContactCreated",
+        (event) => {
+            const newContact = {
+                id: event.id,
+                name: event.name,
+                telegram_username: event.telegram_username,
+                telegram_user_id: event.telegram_user_id,
+                email: null,
+                phone: null,
+                company: null,
+                country: null,
+                is_favorite: false,
+            };
+            props.contacts.data.unshift(newContact);
+        },
+    );
+});
+
+onUnmounted(() => {
+    window.Echo.leave("contacts");
 });
 </script>
 
