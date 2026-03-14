@@ -110,7 +110,11 @@ const submit = () => {
                 </div>
 
                 <div class="lg:col-span-2">
-                    <ChatWindow :chat="chat" :initial-messages="messages" />
+                    <ChatWindow
+                        :contact-id="contact.id"
+                        :chat="chat"
+                        :initial-messages="messages"
+                    />
                 </div>
             </section>
         </div>

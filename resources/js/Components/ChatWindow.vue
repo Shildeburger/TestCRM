@@ -1,7 +1,12 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from "vue";
+import axios from "axios";
 
 const props = defineProps({
+    contactId: {
+        type: Number,
+        required: true,
+    },
     chat: Object,
     initialMessages: {
         type: Array,
@@ -49,11 +54,34 @@ onUnmounted(() => {
     }
 });
 
-const sendMessage = () => {
-    if (!newMessageText.value.trim()) return;
-    console.log("Отправка сообщения:", newMessageText.value);
-    // TODO: Здесь будет логика отправки запроса в Laravel
+const sendMessage = async () => {
+    if (!newMessageText.value.trim() || !props.chat) return;
+
+    //Сохранени текста в переменную и очищение инпута
+    const textToSend = newMessageText.value;
     newMessageText.value = "";
+
+    try {
+        // Отправляем запрос на наш маршрут в ContactController
+        const response = await axios.post(
+            route("contacts.messages.store", props.contactId),
+            {
+                text: textToSend,
+            },
+        );
+
+        //Получаем сохраненное сообщение от сервера и отправляем его в массив
+        messages.value.push(response.data);
+
+        //Прокрутка чата в низ
+        scrollToBottom();
+    } catch (error) {
+        console.error("Ошибка отправки:", error);
+        // Если произошла ошибка сети или Telegram заблокировал бота,
+        // возвращаем текст обратно в инпут, чтобы не потерять его
+        newMessageText.value = textToSend;
+        alert("Не удалось отправить сообщение. Проверьте консоль.");
+    }
 };
 </script>
 

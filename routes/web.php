@@ -47,6 +47,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/contacts/{contact}', [ContactController::class, 'show'])
     ->name('contacts.show');
 
+    Route::post('/contacts/{contact}/messages', [App\Http\Controllers\ContactController::class, 'sendMessage'])
+        ->name('contacts.messages.store')
+        ->middleware('auth');
+
     Route::resource('tasks', TaskController::class)->only([
     'index', 'store', 'update', 'destroy'
     ]);

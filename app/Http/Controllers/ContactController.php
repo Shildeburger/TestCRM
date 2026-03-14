@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\TelegramChat;
 use App\Models\TelegramMessage;
+use DefStudio\Telegraph\Models\TelegraphChat;
 use Inertia\Inertia;
 
 class ContactController extends Controller
@@ -227,6 +228,57 @@ class ContactController extends Controller
                 'chat_external_id' => $chat->chat_external_id,
             ] : null,
             'messages' => $messages,
+        ]);
+    }
+
+    public function sendMessage(Request $request, Contact $contact) {
+        //проверка на право менеджера писать контакту
+        $this->authorizeContact($contact);
+        $request->validate([
+            'text' => 'required|string|max:4096',
+        ]);
+
+        //Находим активный чат этого контакта
+        $chat = TelegramChat::where('contact_id', $contact->id)
+            ->where('is_primary', true)
+            ->firstOrFail();
+
+        //Находим оригинальную модель чата из пакета Telegraph
+        $telegraphChat = TelegraphChat::findOrFail($chat->telegraph_chat_id);
+
+        //Отправляем сообщение в Telegram API
+        $response = $telegraphChat->html($request->text)->send();
+        if ($response->telegraphError()) {
+            return responce()->json([
+                'error' => 'Не удалось отправить сообщение в Telegram'
+            ], 400);
+        }
+
+        //Сохраняем исходящее сообщение в базу данных
+        $message = TelegramMessage::create([
+            'telegram_chat_id' => $chat->id,
+            'direction'        => 'outgoing',
+            'from_role'        => 'manager',
+            'text'             => $request->text,
+            'sent_at'          => now(),
+        ]);
+
+        //Обновение счетчиков чата
+        $chat->last_message_at = now();
+        $chat->save();
+
+        // Транслируем в веб-сокет, чтобы сообщение появилось у других менеджеров 
+        // (toOthers предотвращает дублирование у отправителя)
+        broadcast(new \App\Events\TelegramMessageCreated($message))->toOthers();
+
+        // Возвращаем сообщение во Vue точно в таком же формате, как в методе show()
+        return response()->json([
+            'id'               => $message->id,
+            'telegram_chat_id' => $message->telegram_chat_id,
+            'text'             => $message->text,
+            'direction'        => $message->direction,
+            'from_role'        => $message->from_role,
+            'sent_at'          => $message->sent_at?->toIso8601String(),
         ]);
     }
 }
